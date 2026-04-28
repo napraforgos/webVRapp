@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Venice 360 Tour</title>
+    <script src="https://aframe.io/releases/1.7.0/aframe.min.js"></script>
+
+    <script>
+      const tourData = [
+        { id: "#dawn", title: "Venice at Dawn" },
+        { id: "#midday", title: "Venice at Midday" },
+        { id: "#sunrise", title: "Venice at Sunrise" },
+        { id: "#sunset", title: "Venice at Sunset" }
+      ];
+      
+      let currentIndex = 0;
+
+      function changeImage(direction) {
+        currentIndex = (currentIndex + direction + tourData.length) % tourData.length;
+        
+        const sky = document.querySelector('#image-360');
+        const titleText = document.querySelector('#image-title');
+        
+        // Determine rotation direction: 360 for Next, -360 for Back
+        const rotationValue = direction === 1 ? "0 360 0" : "0 -360 0";
+        sky.setAttribute('animation__portal', 'to', rotationValue);
+        
+        // Trigger the spinning animation
+        sky.emit('portal-warp');
+        
+        // Reset rotation after animation finishes so it doesn't get stuck
+        setTimeout(() => {
+          sky.setAttribute('rotation', '0 0 0');
+          sky.setAttribute('src', tourData[currentIndex].id);
+          titleText.setAttribute('value', tourData[currentIndex].title);
+        }, 1000); 
+      }
+
+      window.addEventListener('load', () => {
+        document.querySelector('#btn-back').addEventListener('click', () => changeImage(-1));
+        document.querySelector('#btn-next').addEventListener('click', () => changeImage(1));
+      });
+    </script>
+  </head>
+  <body>
+    <a-scene>
+      <a-assets>
+        <img id="dawn" src="https://res.cloudinary.com/do7bx4gda/image/upload/v1776688678/venice_dawn_1_4k_lo7vtm.jpg">
+        <img id="midday" src="https://res.cloudinary.com/do7bx4gda/image/upload/v1776688668/venice_dawn_2_4k_pdpyg5.jpg">
+        <img id="sunrise" src="https://res.cloudinary.com/do7bx4gda/image/upload/v1776688648/venice_sunrise_4k_e4vvq4.jpg">
+        <img id="sunset" src="https://res.cloudinary.com/do7bx4gda/image/upload/v1776688667/venice_sunset_4k_e41wxp.jpg">
+      </a-assets>
+
+      <a-sky id="image-360" src="#dawn" 
+             animation__portal="property: rotation; to: 0 360 0; dur: 1000; startEvents: portal-warp; easing: easeInOutQuad"></a-sky>
+
+      <a-plane position="0 2.5 -3" width="3.5" height="0.6" color="#44A3AA" material="opacity: 0.8; transparent: true">
+        <a-text id="image-title" 
+                value="Venice at Dawn" 
+                position="0 0 0.01" 
+                align="center" 
+                color="white" 
+                width="6"></a-text>
+      </a-plane>
+
+      <a-entity position="0 -1 -4">
+        <a-entity id="btn-back" class="button" position="-2 0 0" geometry="primitive: plane; width: 1; height: 0.5" material="color: #AA4B44">
+          <a-text value="BACK" align="center"></a-text>
+        </a-entity>
+        
+        <a-entity id="btn-next" class="button" position="2 0 0" geometry="primitive: plane; width: 1; height: 0.5" material="color: #AA4B44">
+          <a-text value="NEXT" align="center"></a-text>
+        </a-entity>
+      </a-entity>
+
+      <a-camera>
+        <a-cursor raycaster="objects: .button" 
+                  material="color: #4B44AA; shader: flat;"></a-cursor>
+      </a-camera>
+    </a-scene>
+  </body>
+</html>
